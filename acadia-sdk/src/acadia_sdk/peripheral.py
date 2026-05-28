@@ -244,8 +244,10 @@ class Peripheral:
 
         Yields:
             One module-specific ``Result`` dataclass per cycle. The stream
-            ends when ``duration_s`` elapses (then the SDK calls ``Stop``),
-            when the caller breaks, or when the peer closes the stream.
+            ends when ``duration_s`` elapses (the peer honours ``duration_ms``
+            and closes its side), when the caller breaks out of the iterator
+            (the SDK cancels the underlying call), or when the peer closes
+            the stream for any other reason.
         """
         self._require("monitor")
         if period_ms <= 0:
@@ -443,14 +445,10 @@ class Peripheral:
     def _iter_stream(self, rpc_name: str, request: Any, *, timeout: float | None) -> Iterator[Any]:
         with self._stream_lock():
             stream = self._device._stream(rpc_name, request, timeout=timeout)
-            try:
-                for env_pb in stream:
-                    env_dc = common_types.ResultEnvelope.from_proto(env_pb)
-                    _check_envelope_status(env_dc)
-                    yield _convert.unpack_result(env_dc)
-            finally:
-                # Best-effort cancellation of the underlying call.
-                pass
+            for env_pb in stream:
+                env_dc = common_types.ResultEnvelope.from_proto(env_pb)
+                _check_envelope_status(env_dc)
+                yield _convert.unpack_result(env_dc)
 
     @contextmanager
     def _stream_lock(self) -> Iterator[None]:
