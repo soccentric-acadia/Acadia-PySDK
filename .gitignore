@@ -1,0 +1,170 @@
+# =============================================================================
+# Acadia-PySDK — .gitignore
+# =============================================================================
+
+# ----- Python bytecode & build artefacts -------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+sdist/
+wheels/
+*.whl
+*.tar.gz
+pip-wheel-metadata/
+pip-log.txt
+pip-delete-this-directory.txt
+MANIFEST
+share/python-wheels/
+
+# ----- Editable / build backends ---------------------------------------------
+.installed.cfg
+*.manifest
+*.spec
+
+# ----- Virtual environments --------------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+.python-version
+poetry.lock
+Pipfile.lock
+uv.lock
+
+# ----- Test, lint, type-check, coverage caches -------------------------------
+.pytest_cache/
+.cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+nosetests.xml
+*.cover
+*.py,cover
+.hypothesis/
+.benchmarks/
+
+# ----- Jupyter / IPython -----------------------------------------------------
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+profile_default/
+ipython_config.py
+.jupyter/
+
+# ----- Generated proto / dataclass bindings ---------------------------------
+# These are produced by `make gen` from Acadia-HAL/protos/. Commit them
+# only if you want hermetic, reproducible installs without grpcio-tools;
+# otherwise treat them as build artefacts.
+#
+# Default policy: ship them in the wheel, ignore them in git.
+acadia-sdk/src/acadia_sdk/_proto/
+acadia-sdk/src/acadia_sdk/types/
+
+# ----- IDEs / editors --------------------------------------------------------
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.iml
+*.ipr
+*.iws
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+.spyderproject
+.spyproject
+.ropeproject
+.history/
+
+# ----- Vim / Emacs -----------------------------------------------------------
+*.swp
+*.swo
+*.swn
+*~
+.\#*
+\#*\#
+.netrwhist
+Session.vim
+.vim/
+*.bak
+
+# ----- OS cruft --------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+Icon?
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ----- Logs & runtime data ---------------------------------------------------
+*.log
+*.log.*
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# ----- Secrets / credentials -------------------------------------------------
+# DO NOT commit. If you absolutely must check in a sample, name it
+# `.env.example` and whitelist it explicitly.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets.toml
+credentials.json
+.netrc
+
+# ----- Documentation builds --------------------------------------------------
+docs/_build/
+docs/_autosummary/
+site/                 # mkdocs
+_site/                # jekyll
+.docusaurus/
+
+# ----- Local scratch / working notes -----------------------------------------
+scratch/
+sandbox/
+tmp/
+TODO.local.md
+NOTES.local.md
+*.local.md
+*.local
+
+# ----- Tooling state ---------------------------------------------------------
+.direnv/
+.envrc.local
+node_modules/
+*.tsbuildinfo
+
+# ----- Make stamp files (created by top-level Makefile) ----------------------
+# These live inside .venv/ which is already ignored, but keep an explicit
+# rule so people who relocate the stamp dir don't get surprised.
+.stamps/
