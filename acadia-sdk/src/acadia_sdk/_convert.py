@@ -70,3 +70,30 @@ def load_config_class(module_id: str) -> type:
     cls = types_mod.Config
     assert isinstance(cls, type)
     return cls
+
+
+def metric_value(tv: Any) -> bool | int | float | str | None:
+    """Return the populated arm of a ``TypedValue`` (or any ``oneof`` dataclass).
+
+    The Acadia ``hal.common.TypedValue`` carries a metric value as a protobuf
+    ``oneof { bool_value; int_value; double_value; string_value; }``. The
+    generated dataclass exposes all four fields with default values, so it is
+    impossible to tell from a default-valued field alone whether the metric
+    was *unset* or genuinely zero/empty. This helper consults the ``_oneofs``
+    bookkeeping recorded by ``_from_proto`` and returns the value of whichever
+    arm was actually populated on the wire, or ``None`` if no arm was set.
+
+    Example::
+
+        for name, tv in result.results[0].output.metrics.items():
+            print(name, acadia_sdk.metric_value(tv))
+    """
+    oneofs = getattr(tv, "_oneofs", None)
+    if not oneofs:
+        return None
+    # The common case: a single oneof named ``value``. Fall back to picking
+    # the first oneof if some future contract names it differently.
+    which = oneofs.get("value") if "value" in oneofs else next(iter(oneofs.values()), None)
+    if which is None:
+        return None
+    return getattr(tv, which, None)

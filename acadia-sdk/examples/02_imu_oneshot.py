@@ -12,18 +12,8 @@ def main(address: str) -> None:
         result = imu.run_oneshot()
         for tr in result.results:
             print(f"{tr.name:<20} status={tr.output.status.name}")
-            for key, value in tr.output.metrics.items():
-                # TypedValue is a oneof; show whichever arm carries the data.
-                pretty = (
-                    value.double_value
-                    if value.double_value != 0.0
-                    else value.bool_value
-                    if value.bool_value
-                    else value.int_value
-                    if value.int_value
-                    else value.string_value
-                )
-                print(f"    {key:<18} = {pretty!r}")
+            for key, tv in tr.output.metrics.items():
+                print(f"    {key:<18} = {acadia_sdk.metric_value(tv)!r}")
 
 
 if __name__ == "__main__":

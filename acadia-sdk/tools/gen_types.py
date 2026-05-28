@@ -589,7 +589,11 @@ def _from_proto(cls: type, msg: Any) -> Any:
             kwargs[py_name] = [_convert_scalar(fd, v) for v in val]
         else:
             kwargs[py_name] = _convert_scalar(fd, val)
-    return cls(**kwargs)
+    inst = cls(**kwargs)
+    oneofs = getattr(msg.DESCRIPTOR, "oneofs", ())
+    if oneofs:
+        inst._oneofs = {o.name: msg.WhichOneof(o.name) for o in oneofs}
+    return inst
 
 
 def _convert_scalar(fd: Any, val: Any) -> Any:

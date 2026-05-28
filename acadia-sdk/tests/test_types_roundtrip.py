@@ -34,3 +34,33 @@ def test_to_dict_is_jsonable() -> None:
     dc = common_types.TestResult.from_proto(pb)
     d = dc.to_dict()
     json.dumps(d)  # must not raise
+
+
+def test_metric_value_resolves_oneof_arms() -> None:
+    """A zero double is a *real* value, not 'unset'. ``metric_value`` must
+    return 0.0 in that case, not fall through to ``string_value=''``."""
+    import acadia_sdk
+
+    pb = common_pb2.TestResult(module_id="imu", test_id="t", name="accel_read")
+    pb.output.metrics["accel_y"].double_value = 0.0   # legitimate zero
+    pb.output.metrics["accel_x"].double_value = 0.1
+    pb.output.metrics["calibrated"].bool_value = True
+    pb.output.metrics["label"].string_value = "ok"
+    pb.output.metrics["count"].int_value = 7
+    dc = common_types.TestResult.from_proto(pb)
+
+    m = dc.output.metrics
+    assert acadia_sdk.metric_value(m["accel_y"]) == 0.0
+    assert m["accel_y"]._oneofs == {"value": "double_value"}
+    assert acadia_sdk.metric_value(m["accel_x"]) == 0.1
+    assert acadia_sdk.metric_value(m["calibrated"]) is True
+    assert acadia_sdk.metric_value(m["label"]) == "ok"
+    assert acadia_sdk.metric_value(m["count"]) == 7
+
+
+def test_metric_value_returns_none_for_unset_oneof() -> None:
+    """An unconstructed TypedValue (no arm ever set) yields ``None``."""
+    import acadia_sdk
+    from acadia_sdk.types.common import TypedValue
+
+    assert acadia_sdk.metric_value(TypedValue()) is None
