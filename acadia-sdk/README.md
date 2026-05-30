@@ -5,7 +5,7 @@ A Pythonic, statically-typed client for the [Acadia HAL](../Acadia-HAL/)
 benches, certification scripts, and lab automation.
 
 * **One import** — `import acadia_sdk as ivv`
-* **One call to connect** — `ivv.connect("192.168.1.50:50051")`
+* **One call to connect** — `ivv.connect("192.168.1.50:50052")`
 * **One handle per peripheral** — `dev.peripheral("imu").run_oneshot()`
 * **All five HAL test modes** — single-shot, monitoring, event-based,
   long-running, plus pause/resume/stop.
@@ -14,6 +14,17 @@ benches, certification scripts, and lab automation.
 * **No raw protobuf, no raw gRPC** — every exception path is translated to
   the SDK's `IVVError` taxonomy.
 
+> **Connection model:** The SDK connects **directly to the Acadia Client
+> (`acadia-client`) on the target board**, not to the Acadia Server.
+> The default HalService port is **50052** (configurable via
+> `hal_service_port` in `client.conf`).  
+> The Client hosts the `HalService` gRPC endpoint as an always-on inbound
+> listener.  All test execution flows Client → HAL API → HAL library.
+> This path is **off-the-record** — no data is written to the Server's
+> database.  Use the Server/Dashboard path for on-the-record runs.
+>
+> Typical address: `"<target-board-ip>:50052"`
+
 ---
 
 ## Five-minute example
@@ -21,7 +32,9 @@ benches, certification scripts, and lab automation.
 ```python
 import acadia_sdk as ivv
 
-with ivv.connect("192.168.1.50:50051") as dev:
+# Connect to the HalService running on the target board (Acadia Client).
+# Default port is 50052; set hal_service_port in client.conf to change it.
+with ivv.connect("192.168.1.50:50052") as dev:
     print("Peripherals:", dev.peripherals())
 
     imu = dev.peripheral("imu")
