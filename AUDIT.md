@@ -9,11 +9,11 @@
 
 ## 1. Verdict
 
-**Health: GREEN.**
+**Health: GREEN with one documentation bug.**
 
 Top 3 findings:
 
-1. **Connection target is correct.** The SDK connects to `HalService` on the **Client** (port `50051`), not to the Server. `acadia-sdk/src/acadia_sdk/_proto/hal_service_pb2_grpc.py:9` defines `HalServiceStub` with all eight RPCs (`/hal.HalService/RunSingleShot`, `StartLongTerm`, `StartMonitoring`, `StartEventBased`, `Stop`, `Pause`, `Resume`, `ListModules`). The doctring example in `__init__.py:11-12` shows `ivv.connect("192.168.1.50:50051")`. This is the correct architectural placement for a thin IV&V test runner — bypassing the Server avoids any DB-side mutation and exercises the same gRPC surface that the contract pins.
+1. **Connection target is correct, but two in-code docstrings show the wrong port.** The SDK's `HalServiceStub` is the right wire interface (`acadia-sdk/src/acadia_sdk/_proto/hal_service_pb2_grpc.py:9`, all eight RPCs: `/hal.HalService/RunSingleShot`, `StartLongTerm`, `StartMonitoring`, `StartEventBased`, `Stop`, `Pause`, `Resume`, `ListModules`). The Client config (`Acadia-Client/conf/client.conf.sample:20`, `Acadia-Client/src/config/client_config.h:19`) makes the Client's HalService listen on **`50052`** (50051 is reserved for the Server's gRPC; the Client connects *outbound* to that). The PySDK README is correct (`acadia-sdk/README.md:8` shows `"192.168.1.50:50052"`), but two in-code docstrings still show the old `:50051`: `acadia-sdk/src/acadia_sdk/__init__.py:12` and `acadia-sdk/src/acadia_sdk/client.py:28,40`. **A user copy-pasting the docstring example will land on the Server, not the Client, and bypass the IV&V invariant.** Doc-only fix, no logic change. The latest commit message (`df75926` — "Add CI workflow, update Makefile to use uv, and adjust README connection port") shows the README was fixed but the module docstrings were missed.
 2. **`gen-check` drift guard is real and functional.** Verified empirically: a comment-only proto change still passes (correct — descriptor unchanged), but adding an enum value to `protos/common.proto` (`DRIFT_MODE = 5`) makes `make gen-check` print `gen-check FAILED — stubs are stale; run 'make gen' and commit.` and exit non-zero. The check is not theatre. Both runs reverted; working tree clean.
 3. **Public API is hand-written over generated stubs; no raw protobuf leaks.** `__init__.py` `__all__` exports only the curated surface (`Device`, `connect`, `Peripheral`, `LongRunningSession`, `metric_value`, exceptions, version). Generated `_proto/` is private (underscore prefix). Type dataclasses live under `acadia_sdk.types` and are produced by `tools/gen_types.py`, also driven by `gen-check`. Customers see Python dataclasses, not `google.protobuf.Message`.
 
@@ -109,7 +109,7 @@ Both observed in this audit; the proto file was reverted (`git status` clean).
 | Source claim | Reality | Verdict |
 | --- | --- | --- |
 | "35 passing tests" (`SDK_FINDINGS.md`) | `35 passed in 0.54s` | **TRUE** |
-| "PySDK connects to `HalService`" | `HalServiceStub`, port `50051` in docstring example, all 8 RPCs wired | **TRUE** |
+| "PySDK connects to `HalService`" | `HalServiceStub` correct, all 8 RPCs wired; **port shown in two in-code docstrings is `50051` (Server) instead of `50052` (Client)** — README is correct | **MOSTLY TRUE — doc bug** |
 | "`gen-check` ensures stub freshness" | Verified via real semantic drift | **TRUE** |
 | "Public API hides protobuf" | `__all__` curated; generated under `_proto/` (private) | **TRUE** |
 | "Pythonic over generated stubs" | `Peripheral` maps modes → RPCs; dataclasses replace messages | **TRUE** |
