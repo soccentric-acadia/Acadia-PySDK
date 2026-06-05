@@ -23,17 +23,20 @@ classifiers = [
 ]
 dependencies = [
   "grpcio>=1.51,<2.0",
-  "protobuf>=4.21,<5.0",
+  "protobuf>=5.26",
 ]
 
 [project.optional-dependencies]
 dev = [
   "grpcio-tools>=1.51,<2.0",
+  "mypy-protobuf>=3.4",
   "pytest>=8.0",
   "pytest-cov>=4.0",
   "mypy>=1.8",
   "ruff>=0.4",
   "pyyaml>=6.0",
+  "types-protobuf",
+  "types-grpcio",
 ]
 
 [project.urls]
@@ -60,7 +63,10 @@ ignore = ["B008"]
 python_version = "3.10"
 strict = true
 files = ["src/acadia_sdk"]
-exclude = "src/acadia_sdk/(_proto|types)/.*"
+exclude = [
+  "^src/acadia_sdk/_proto/",
+  "^src/acadia_sdk/types/",
+]
 
 [[tool.mypy.overrides]]
 module = ["grpc", "grpc.*", "google.protobuf.*"]

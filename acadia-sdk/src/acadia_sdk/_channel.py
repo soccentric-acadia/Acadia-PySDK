@@ -52,9 +52,9 @@ def open_channel(address: str, *, options: list[tuple[str, Any]] | None = None) 
 
 def _translate_rpc_error(rpc_err: grpc.RpcError) -> exc.IVVError:
     code: grpc.StatusCode = rpc_err.code() if hasattr(rpc_err, "code") else grpc.StatusCode.UNKNOWN
-    detail: str = rpc_err.details() if hasattr(rpc_err, "details") else str(rpc_err)
+    detail: str | None = rpc_err.details() if hasattr(rpc_err, "details") else str(rpc_err)
     cls = _STATUS_TO_EXC.get(code, exc.IVVError)
-    msg = f"{code.name if code else 'UNKNOWN'}: {detail}"
+    msg = f"{code.name if code else 'UNKNOWN'}: {detail or ''}"
     return cls(msg)
 
 

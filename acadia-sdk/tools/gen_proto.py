@@ -109,6 +109,11 @@ def main() -> int:
     out_dir.mkdir(parents=True)
     (out_dir / "modules").mkdir()
 
+    # Add venv bin to PATH so protoc can find mypy plugins
+    venv_bin = SDK_ROOT.parent / ".venv" / "bin"
+    if venv_bin.exists():
+        os.environ["PATH"] = f"{venv_bin}:{os.environ.get('PATH', '')}"
+
     # protoc invocation. Use grpc_tools.protoc programmatically.
     from grpc_tools import protoc  # type: ignore[import-untyped]
 
@@ -117,6 +122,8 @@ def main() -> int:
         f"-I{protos_dir}",
         f"--python_out={out_dir}",
         f"--grpc_python_out={out_dir}",
+        f"--mypy_out={out_dir}",
+        f"--mypy_grpc_out={out_dir}",
         *[str(p.relative_to(protos_dir)) for p in proto_files],
     ]
     # grpc_tools.protoc needs argv0 + the well-known proto include path.
@@ -131,14 +138,18 @@ def main() -> int:
     )
     for f in out_dir.rglob("*.py"):
         rewrite_imports(f)
+    # Also rewrite imports in .pyi stub files
+    for f in out_dir.rglob("*.pyi"):
+        rewrite_imports(f)
 
     # Top-level package __init__.
     (out_dir / "__init__.py").write_text(
         '"""Vendored gRPC stubs for the Acadia HAL contract (PRIVATE).\n\nCustomers MUST NOT import from this package. Use ``acadia_sdk`` instead.\n"""\n'
     )
 
-    n_files = sum(1 for _ in out_dir.rglob("*.py"))
-    print(f"[gen_proto] wrote {n_files} Python files under {out_dir}")
+    n_py_files = sum(1 for _ in out_dir.rglob("*.py"))
+    n_pyi_files = sum(1 for _ in out_dir.rglob("*.pyi"))
+    print(f"[gen_proto] wrote {n_py_files} Python files and {n_pyi_files} stub files under {out_dir}")
     return 0
 
 
