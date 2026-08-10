@@ -3,6 +3,25 @@
 All notable changes to `acadia-sdk` are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased / 0.2.0]
+
+### Changed
+* **Breaking rename**: the distribution and import package have been renamed
+  from `acadia-sdk` / `acadia_sdk` to `acadia-sdk` / `acadia_sdk`. The SDK
+  is the Acadia-Project leaf, so the package name now reflects that.
+
+### Added
+* **Deprecation shim**: `import acadia_sdk` still works and emits a
+  `DeprecationWarning` directing callers to `import acadia_sdk`. The shim
+  re-exports the full public surface of `acadia_sdk` (mirroring
+  `acadia_sdk.__all__`). The shim will be removed in a future release;
+  migrate imports to `acadia_sdk` before then.
+
+### Migration
+Replace `import acadia_sdk` / `from acadia_sdk import ...` with the
+`acadia_sdk` equivalent. No behavioural changes are expected for existing
+callers during the deprecation window.
+
 ## [0.1.0] — Initial release
 
 ### Added

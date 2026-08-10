@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "acadia-sdk"
 version = "0.1.0"
-description = "Python SDK for the SiliconCentric IV&V platform (HalService client)."
+description = "Python SDK for the SiliconCentric Acadia IV&V platform (HalService client)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
@@ -47,7 +47,6 @@ where = ["src"]
 include = ["acadia_sdk*"]
 
 [tool.setuptools.package-data]
-"acadia_sdk" = ["py.typed"]
 "acadia_sdk._proto" = ["**/*.pyi"]
 
 [tool.ruff]

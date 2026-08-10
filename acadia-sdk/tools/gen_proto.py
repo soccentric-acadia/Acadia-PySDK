@@ -20,7 +20,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SDK_ROOT = HERE.parent
-# Acadia-PySDK/acadia-sdk → Acadia-PySDK → Acadia (which holds Acadia-HAL/).
+# Acadia-PySDK/acadia-sdk → Acadia-PySDK → Acadia (which holds the HAL protos).
 DEFAULT_PROTOS = (SDK_ROOT.parent.parent / "Acadia-HAL" / "protos").resolve()
 OUT_DIR = SDK_ROOT / "src" / "acadia_sdk" / "_proto"
 
@@ -79,7 +79,7 @@ def main() -> int:
         "--protos",
         type=Path,
         default=DEFAULT_PROTOS,
-        help=f"Path to the Acadia-HAL protos directory (default: {DEFAULT_PROTOS}).",
+        help=f"Path to the HAL protos directory (default: {DEFAULT_PROTOS}).",
     )
     parser.add_argument("--out", type=Path, default=OUT_DIR)
     args = parser.parse_args()
@@ -116,10 +116,17 @@ def main() -> int:
 
     # protoc invocation. Use grpc_tools.protoc programmatically.
     from grpc_tools import protoc  # type: ignore[import-untyped]
+    import grpc_tools  # type: ignore[import-untyped]
+
+    # Well-known protos (google/protobuf/timestamp.proto etc.) ship with
+    # grpc_tools under ``grpc_tools/_proto``; add them as a second include path
+    # so protoc can resolve ``import "google/protobuf/timestamp.proto"``.
+    well_known_include = Path(grpc_tools.__file__).resolve().parent / "_proto"
 
     argv = [
         "protoc",
         f"-I{protos_dir}",
+        f"-I{well_known_include}",
         f"--python_out={out_dir}",
         f"--grpc_python_out={out_dir}",
         f"--mypy_out={out_dir}",
