@@ -1,6 +1,6 @@
 # Acadia-PySDK — specs
 
-Remote: `git@github.com:SiliconCentric/Acadia-PySDK.git`
+Remote: `git@github.com:soccentric-acadia/Acadia-PySDK.git`
 Stack: Python, uv-managed, src layout.
 
 Consumes the `HalService` gRPC endpoint exposed by Acadia-Client — the same wire contract
