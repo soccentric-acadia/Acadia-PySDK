@@ -21,7 +21,10 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SDK_ROOT = HERE.parent
 # Acadia-PySDK/acadia-sdk → Acadia-PySDK → Acadia (which holds the HAL protos).
-DEFAULT_PROTOS = (SDK_ROOT.parent.parent / "Acadia-HAL" / "protos").resolve()
+# The canonical source can be overridden with ACADIA_HAL_PROTOS so clean
+# checkouts / CI can point at a published contract checkout.
+_DEFAULT_RELATIVE = (SDK_ROOT.parent.parent / "Acadia-HAL" / "protos").resolve()
+DEFAULT_PROTOS = Path(os.environ.get("ACADIA_HAL_PROTOS", str(_DEFAULT_RELATIVE))).resolve()
 OUT_DIR = SDK_ROOT / "src" / "acadia_sdk" / "_proto"
 
 # Proto files we consume (we DO NOT vendor client_service.proto — the SDK
