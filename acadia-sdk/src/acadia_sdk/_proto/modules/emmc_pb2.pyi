@@ -56,55 +56,18 @@ class Result(_message.Message):
 
     DESCRIPTOR: _descriptor.Descriptor
 
-    STATUS_FIELD_NUMBER: _builtins.int
-    MESSAGE_FIELD_NUMBER: _builtins.int
-    DETAILS_FIELD_NUMBER: _builtins.int
-    status: _common_pb2.TestStatus.ValueType
-    message: _builtins.str
+    RESULTS_FIELD_NUMBER: _builtins.int
     @_builtins.property
-    def details(self) -> _containers.RepeatedCompositeFieldContainer[Global___TestDetail]: ...
+    def results(self) -> _containers.RepeatedCompositeFieldContainer[_common_pb2.TestResult]: ...
     def __init__(
         self,
         *,
-        status: _common_pb2.TestStatus.ValueType = ...,
-        message: _builtins.str = ...,
-        details: _abc.Iterable[Global___TestDetail] | None = ...,
+        results: _abc.Iterable[_common_pb2.TestResult] | None = ...,
     ) -> None: ...
     _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
     def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
-    _ClearFieldArgType: _TypeAlias = _typing.Literal["details", b"details", "message", b"message", "status", b"status"]  # noqa: Y015
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["results", b"results"]  # noqa: Y015
     def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
     def WhichOneof(self, oneof_group: _Never) -> None: ...
 
 Global___Result: _TypeAlias = Result  # noqa: Y015
-
-@_typing.final
-class TestDetail(_message.Message):
-    DESCRIPTOR: _descriptor.Descriptor
-
-    NAME_FIELD_NUMBER: _builtins.int
-    PASSED_FIELD_NUMBER: _builtins.int
-    MESSAGE_FIELD_NUMBER: _builtins.int
-    VALUE_FIELD_NUMBER: _builtins.int
-    UNIT_FIELD_NUMBER: _builtins.int
-    name: _builtins.str
-    passed: _builtins.bool
-    message: _builtins.str
-    value: _builtins.float
-    unit: _builtins.str
-    def __init__(
-        self,
-        *,
-        name: _builtins.str = ...,
-        passed: _builtins.bool = ...,
-        message: _builtins.str = ...,
-        value: _builtins.float = ...,
-        unit: _builtins.str = ...,
-    ) -> None: ...
-    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
-    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
-    _ClearFieldArgType: _TypeAlias = _typing.Literal["message", b"message", "name", b"name", "passed", b"passed", "unit", b"unit", "value", b"value"]  # noqa: Y015
-    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
-    def WhichOneof(self, oneof_group: _Never) -> None: ...
-
-Global___TestDetail: _TypeAlias = TestDetail  # noqa: Y015

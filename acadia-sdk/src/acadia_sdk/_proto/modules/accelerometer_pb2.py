@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from acadia_sdk._proto import common_pb2 as common__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bmodules/accelerometer.proto\x12\x19hal.modules.accelerometer\x1a\x0c\x63ommon.proto\"F\n\x06\x43onfig\x12(\n\x06\x63ommon\x18\x01 \x01(\x0b\x32\x18.hal.common.CommonConfig\x12\x12\n\ntest_names\x18\x02 \x03(\t\"y\n\x06Result\x12&\n\x06status\x18\x01 \x01(\x0e\x32\x16.hal.common.TestStatus\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x36\n\x07\x64\x65tails\x18\x03 \x03(\x0b\x32%.hal.modules.accelerometer.TestDetail\"X\n\nTestDetail\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06passed\x18\x02 \x01(\x08\x12\x0f\n\x07message\x18\x03 \x01(\t\x12\r\n\x05value\x18\x04 \x01(\x01\x12\x0c\n\x04unit\x18\x05 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bmodules/accelerometer.proto\x12\x19hal.modules.accelerometer\x1a\x0c\x63ommon.proto\"F\n\x06\x43onfig\x12(\n\x06\x63ommon\x18\x01 \x01(\x0b\x32\x18.hal.common.CommonConfig\x12\x12\n\ntest_names\x18\x02 \x03(\t\"]\n\x06Result\x12\'\n\x07results\x18\x04 \x03(\x0b\x32\x16.hal.common.TestResultJ\x04\x08\x01\x10\x02J\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04R\x06statusR\x07messageR\x07\x64\x65tailsb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,7 +35,5 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CONFIG']._serialized_start=72
   _globals['_CONFIG']._serialized_end=142
   _globals['_RESULT']._serialized_start=144
-  _globals['_RESULT']._serialized_end=265
-  _globals['_TESTDETAIL']._serialized_start=267
-  _globals['_TESTDETAIL']._serialized_end=355
+  _globals['_RESULT']._serialized_end=237
 # @@protoc_insertion_point(module_scope)

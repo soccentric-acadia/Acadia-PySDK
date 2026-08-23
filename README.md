@@ -42,7 +42,7 @@ operators.
 | 7 | Typed request/result round trips | Implemented | `test_types_roundtrip.py` | [ ] Manual verification required |
 | 8 | Fake server and pytest fixtures | Implemented | Used by package tests | [ ] Manual verification required |
 | 9 | Examples and API documentation | Implemented | Execution unknown | [ ] Manual verification required |
-| 10 | Protocol compatibility with Acadia-Client | Unknown | Generation/check exists; compatibility unverified | [ ] Manual verification required |
+| 10 | Protocol compatibility with Acadia-Client | Implemented | Regenerated from Acadia-HAL/protos; all 54 modules typed (`fan`/`hdmi`/`wifi` added) | [ ] Manual verification required |
 
 Python SDK leaf for the **Acadia** project (NVIDIA Jetson + STM32) in the SiliconCentric
 `project-managers` fleet.

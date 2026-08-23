@@ -35,7 +35,6 @@ class TestStatus(enum.IntEnum):
     ERROR = 3
     TIMEOUT = 4
     ABORTED = 5
-    PARTIAL = 6
 
 class TestSeverity(enum.IntEnum):
     """Mirrors enum ``hal.common.TestSeverity``."""

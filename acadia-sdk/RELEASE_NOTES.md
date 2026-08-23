@@ -11,9 +11,10 @@
   module (overall ≈95% on the SDK surface, lower aggregate when the
   53 generated dataclass modules are included because most of the
   unused modules' codegen paths are not exercised — by design).
-* Generated bindings for the entire HAL contract: 51 module protos plus
-  the shared `common` and `hal_service` packages, totalling 108 protobuf
-  modules and 53 dataclass modules. Round-trips (`pb → dataclass → pb`)
+* Generated bindings for the entire HAL contract: 54 module protos plus
+  the shared `common` and `hal_service` packages, totalling 114 protobuf
+  modules and 56 dataclass modules. Includes `fan`, `hdmi`, and `wifi`
+  (new in the HAL registry). Round-trips (`pb → dataclass → pb`)
   are verified for enums, maps, repeated fields, and `oneof` arms.
 
 ## What lives where

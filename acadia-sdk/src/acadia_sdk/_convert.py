@@ -62,9 +62,21 @@ def pack_module_config(module_id: str, config_dc: Any) -> Any:
 
 
 def load_config_class(module_id: str) -> type:
-    """Return the dataclass for ``hal.modules.<module_id>.Config``."""
+    """Return the dataclass for ``hal.modules.<module_id>.Config``.
+
+    Also imports the module's generated ``*_pb2`` module so its descriptors are
+    registered in the global symbol database. This is required for the returned
+    dataclass's ``to_proto()`` to resolve the protobuf class when the SDK builds
+    a config before any result has been unpacked (the result path already
+    imports the pb2 module). Without this, a fresh module (e.g. ``fan``,
+    ``hdmi``, ``wifi``) whose pb2 has not otherwise been imported would raise
+    ``KeyError`` in ``to_proto()``.
+    """
     try:
         types_mod = importlib.import_module(f"acadia_sdk.types.modules.{module_id}")
+        # Importing the pb2 registers its messages/enums in the symbol DB so
+        # ``Config.to_proto()`` can resolve ``hal.modules.<id>.Config``.
+        importlib.import_module(f"acadia_sdk._proto.modules.{module_id}_pb2")
     except ModuleNotFoundError as e:
         raise LookupError(f"no typed bindings for module {module_id!r}") from e
     cls = types_mod.Config

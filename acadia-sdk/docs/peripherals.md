@@ -54,15 +54,16 @@ The list below was the registry at the time of this release; check
 `dev.peripherals()` against your peer for the live set.
 
 ```
-audio, can_bus, cellular_modem, communication, cpu, csv,
-data_storage, display, emmc, environmental, ethernet,
-ethernet_switch, external_connector, functional_safety,
-gnss, gpio, gpu, i2c, imu, mcu_interface, mipi_csi, mipi_dsi,
-nvme, pcie, poe_hat, power_management, pwm_output,
-reliability, rs485, rtc, sd_card, security_features,
-sense_hat, serializer_deserializer, software_interface, spi,
-storage, system_integration, system_memory,
-thermal_management, uart, usb, video_encode_decode,
-vision_accelerator, watchdog_and_reset
+accelerometer, analog_input, audio_interfaces, battery, bluetooth,
+camera_interfaces, camera_module3, can_bus, clock_and_timing,
+communication_interface, cpu, debug_and_development_interfaces,
+deep_learning_accelerator, display_interfaces, emmc, environmental,
+ethernet, ethernet_switch, external_connector, fan, functional_safety,
+gnss, gpio, gpu, hdmi, i2c, imu, mcu_interface, mipi_csi, mipi_dsi,
+nvme, pcie, poe_hat, power_management, pwm_output, reliability, rs485,
+rtc, sd_card, security_features, sense_hat, serializer_deserializer,
+software_interface, spi, storage, system_integration, system_memory,
+thermal_management, uart, usb, video_encode_decode, vision_accelerator,
+watchdog_and_reset, wifi
 ```
-(51 modules.)
+(54 modules.)

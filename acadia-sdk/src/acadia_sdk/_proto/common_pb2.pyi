@@ -81,7 +81,7 @@ class _TestStatusEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[_TestStatus
     TEST_STATUS_TIMEOUT: _TestStatus.ValueType  # 4
     TEST_STATUS_ABORTED: _TestStatus.ValueType  # 5
     TEST_STATUS_SKIPPED: _TestStatus.ValueType  # 7
-    """new value; 5 was ABORTED, 6 was PARTIAL"""
+    """6 was PARTIAL (deprecated, retired; see reserved below)"""
     PASS: _TestStatus.ValueType  # 1
     """Deprecated short aliases kept for envelope-level consumers:
     deprecated; use TEST_STATUS_PASS
@@ -94,14 +94,17 @@ class _TestStatusEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[_TestStatus
     """deprecated; use TEST_STATUS_TIMEOUT"""
     ABORTED: _TestStatus.ValueType  # 5
     """deprecated; use TEST_STATUS_ABORTED"""
-    PARTIAL: _TestStatus.ValueType  # 6
-    """deprecated envelope aggregate — no longer produced; kept to avoid decode errors"""
 
 class TestStatus(_TestStatus, metaclass=_TestStatusEnumTypeWrapper):
     """Per-test and overall-run status.
-    Numeric values are stable forever — never reassign.
+    Numeric values are stable forever — never reassign, never reuse.
     The prefixed names (TEST_STATUS_*) are canonical; the short names are
     legacy aliases kept for envelope-level consumers and are deprecated.
+    Numeric value 6 was historically PARTIAL (an envelope-level aggregate);
+    that aggregate is no longer produced and the C++ hal::Status enum has
+    no PARTIAL member. The value 6 is now formally reserved so it cannot
+    be rebound and so any incoming wire value of 6 is rejected at decode
+    time rather than silently mapped to a dead alias.
     """
 
 TEST_STATUS_UNSPECIFIED: TestStatus.ValueType  # 0
@@ -112,7 +115,7 @@ TEST_STATUS_ERROR: TestStatus.ValueType  # 3
 TEST_STATUS_TIMEOUT: TestStatus.ValueType  # 4
 TEST_STATUS_ABORTED: TestStatus.ValueType  # 5
 TEST_STATUS_SKIPPED: TestStatus.ValueType  # 7
-"""new value; 5 was ABORTED, 6 was PARTIAL"""
+"""6 was PARTIAL (deprecated, retired; see reserved below)"""
 PASS: TestStatus.ValueType  # 1
 """Deprecated short aliases kept for envelope-level consumers:
 deprecated; use TEST_STATUS_PASS
@@ -125,8 +128,6 @@ TIMEOUT: TestStatus.ValueType  # 4
 """deprecated; use TEST_STATUS_TIMEOUT"""
 ABORTED: TestStatus.ValueType  # 5
 """deprecated; use TEST_STATUS_ABORTED"""
-PARTIAL: TestStatus.ValueType  # 6
-"""deprecated envelope aggregate — no longer produced; kept to avoid decode errors"""
 Global___TestStatus: _TypeAlias = TestStatus  # noqa: Y015
 
 class _TestSeverity:
