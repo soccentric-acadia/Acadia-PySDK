@@ -21,7 +21,7 @@
 
 ```
 Acadia-PySDK/
-├── src/acadia_sdk/            ← hand-written SDK surface
+├── acadia_sdk/                ← hand-written SDK surface
 │   ├── __init__.py         ← public re-exports
 │   ├── client.py           ← connect(), Device
 │   ├── peripheral.py       ← Peripheral, LongRunningSession
