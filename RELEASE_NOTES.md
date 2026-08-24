@@ -20,7 +20,7 @@
 ## What lives where
 
 ```
-acadia-sdk/
+Acadia-PySDK/
 ├── src/acadia_sdk/            ← hand-written SDK surface
 │   ├── __init__.py         ← public re-exports
 │   ├── client.py           ← connect(), Device
@@ -99,7 +99,7 @@ A friendlier surface (e.g. `sample.accel_x`) can be layered on top in
 ## Verifying the release
 
 ```bash
-cd acadia-sdk
+cd Acadia-PySDK
 pip install -e .[dev]
 make lint typecheck test
 ```

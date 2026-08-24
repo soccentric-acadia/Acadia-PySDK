@@ -3,19 +3,18 @@
 # Acadia-PySDK — reproducible build + CI image.
 #
 # Installs uv (bundled in the base image), creates the venv, runs
-# lint/typecheck/test, and builds the wheel + sdist into /dist. Build in the
-# acadia-sdk directory so the package's src-layout is resolved correctly.
+# lint/typecheck/test, and builds the wheel + sdist into /dist.
 # ──────────────────────────────────────────────────────────────────────────────
 FROM ghcr.io/astral-sh/uv:0.7.0-bookworm-slim AS builder
 
-WORKDIR /workspace/acadia-sdk
+WORKDIR /workspace
 
-COPY acadia-sdk/pyproject.toml acadia-sdk/uv.lock* ./
+COPY pyproject.toml uv.lock* ./
 # Create the venv and install deps first (cached even when sources change).
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --extra dev --no-install-project
 
-COPY acadia-sdk/ .
+COPY . .
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --extra dev

@@ -23,12 +23,11 @@ SHELL        := /bin/bash
 
 UV           ?= uv
 VENV         ?= .venv
-SDK_DIR      := acadia-sdk
 STAMP_DIR    := $(VENV)/.stamps
 INSTALL_STAMP := $(STAMP_DIR)/installed
 
 # Generated output directory (must match tools/gen_proto.py OUT_DIR)
-PROTO_OUT    := $(SDK_DIR)/src/acadia_sdk/_proto
+PROTO_OUT    := src/acadia_sdk/_proto
 
 # ANSI colours
 ifneq (,$(findstring xterm,$(TERM)))
@@ -67,9 +66,9 @@ $(VENV)/bin/python:
 	$(call banner,Creating uv venv at $(VENV))
 	@$(UV) venv $(VENV)
 
-$(INSTALL_STAMP): $(VENV)/bin/python $(SDK_DIR)/pyproject.toml
+$(INSTALL_STAMP): $(VENV)/bin/python pyproject.toml
 	$(call banner,Installing acadia-sdk[dev] in editable mode via uv)
-	@$(UV) pip install --python $(VENV)/bin/python -e "$(SDK_DIR)[dev]"
+	@$(UV) pip install --python $(VENV)/bin/python -e ".[dev]"
 	@mkdir -p $(STAMP_DIR)
 	@touch $(INSTALL_STAMP)
 
@@ -78,16 +77,16 @@ $(INSTALL_STAMP): $(VENV)/bin/python $(SDK_DIR)/pyproject.toml
 
 gen: $(INSTALL_STAMP) ## Regenerate proto + dataclass bindings from Acadia-HAL/protos
 	$(call banner,Regenerating proto bindings)
-	@$(VENV)/bin/python $(SDK_DIR)/tools/gen_proto.py
+	@$(VENV)/bin/python tools/gen_proto.py
 	$(call banner,Regenerating dataclass bindings)
-	@$(VENV)/bin/python $(SDK_DIR)/tools/gen_types.py
+	@$(VENV)/bin/python tools/gen_types.py
 
 gen-check: $(INSTALL_STAMP) ## Fail if committed stubs are stale
 	$(call banner,Checking proto stubs are up-to-date)
 	@tmpdir=$$(mktemp -d); \
 	cp -a $(PROTO_OUT) "$$tmpdir/proto_before"; \
-	$(VENV)/bin/python $(SDK_DIR)/tools/gen_proto.py 2>/dev/null; \
-	$(VENV)/bin/python $(SDK_DIR)/tools/gen_types.py 2>/dev/null; \
+	$(VENV)/bin/python tools/gen_proto.py 2>/dev/null; \
+	$(VENV)/bin/python tools/gen_types.py 2>/dev/null; \
 	if ! diff -rq --exclude="__pycache__" "$$tmpdir/proto_before" $(PROTO_OUT) >/dev/null 2>&1; then \
 		echo "gen-check FAILED — stubs are stale; run 'make gen' and commit."; \
 		rm -rf "$$tmpdir"; \
@@ -106,21 +105,21 @@ gen-clean: ## Wipe generated stubs and do a full clean regen
 
 test: $(INSTALL_STAMP) ## Run pytest with coverage
 	$(call banner,Running test suite)
-	@cd $(SDK_DIR) && ../$(VENV)/bin/python -m pytest tests \
+	@$(VENV)/bin/python -m pytest tests \
 		--cov=acadia_sdk --cov-report=term-missing -q
 
 lint: $(INSTALL_STAMP) ## Run ruff
 	$(call banner,Linting with ruff)
-	@$(VENV)/bin/python -m ruff check $(SDK_DIR)/src/acadia_sdk
+	@$(VENV)/bin/python -m ruff check src/acadia_sdk
 
 typecheck: $(INSTALL_STAMP) ## Run mypy --strict
 	$(call banner,Type-checking with mypy --strict)
-	@$(VENV)/bin/python -m mypy --strict --config-file $(SDK_DIR)/pyproject.toml $(SDK_DIR)/src/acadia_sdk
+	@$(VENV)/bin/python -m mypy --strict --config-file pyproject.toml src/acadia_sdk
 
 build: $(INSTALL_STAMP) ## Build sdist + wheel
 	$(call banner,Building distribution artefacts)
 	@$(UV) pip install --python $(VENV)/bin/python --quiet build
-	@$(VENV)/bin/python -m build --outdir $(SDK_DIR)/dist $(SDK_DIR)
+	@$(VENV)/bin/python -m build --outdir dist .
 
 # ── Convenience ───────────────────────────────────────────────────────────────
 .PHONY: shell
@@ -130,10 +129,10 @@ shell: $(INSTALL_STAMP) ## Drop into a uv-activated subshell
 # ── Cleanup ───────────────────────────────────────────────────────────────────
 .PHONY: clean distclean
 clean: ## Remove build artefacts (keeps venv)
-	@rm -rf $(SDK_DIR)/build $(SDK_DIR)/dist $(SDK_DIR)/*.egg-info
-	@rm -rf $(SDK_DIR)/.pytest_cache $(SDK_DIR)/.mypy_cache $(SDK_DIR)/.ruff_cache
-	@rm -rf $(SDK_DIR)/htmlcov $(SDK_DIR)/.coverage
-	@find $(SDK_DIR) -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	@rm -rf build dist *.egg-info
+	@rm -rf .pytest_cache .mypy_cache .ruff_cache
+	@rm -rf htmlcov .coverage
+	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
 distclean: clean ## Also remove the uv venv
 	$(call banner,Removing venv)
