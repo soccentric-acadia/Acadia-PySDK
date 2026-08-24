@@ -1,0 +1,15 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+stages: [check]
+
+check:
+  stage: check
+  image: python:3.12-bookworm
+  before_script:
+    - pip install --no-cache-dir uv
+  script:
+    - make check
+    - make build
