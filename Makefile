@@ -137,4 +137,4 @@ clean: ## Remove build artefacts (keeps venv)
 
 distclean: clean ## Also remove the uv venv
 	$(call banner,Removing venv)
-	@rm -rf $(VENV) $(STAMP_DIR)
+	@rm -rf $(VENV) $(STAMP_DIR) .mypy_cache .ruff_cache .pytest_cache
