@@ -37,9 +37,9 @@ assert "sibling Acadia-HAL checkout present" \
   'test -d ../Acadia-HAL/protos || { echo "../Acadia-HAL missing — make gen has nothing to generate from"; exit 1; }'
 
 assert "generated proto stubs are committed, not ignored" \
-  'ls acadia-sdk/src/acadia_sdk/_proto/*_pb2.py >/dev/null 2>&1 \
+  'ls src/acadia_sdk/_proto/*_pb2.py >/dev/null 2>&1 \
      || { echo "no committed stubs under _proto/ — the workflow expects them committed"; exit 1; }
-   ! git check-ignore -q acadia-sdk/src/acadia_sdk/_proto 2>/dev/null \
+   ! git check-ignore -q src/acadia_sdk/_proto 2>/dev/null \
      || { echo "_proto/ is gitignored; it must stay tracked"; exit 1; }'
 
 # Known defect: `make gen` still points at the pre-rename Acadia-HAL path.
