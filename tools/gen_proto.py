@@ -113,7 +113,7 @@ def main() -> int:
     (out_dir / "modules").mkdir()
 
     # Add venv bin to PATH so protoc can find mypy plugins
-    venv_bin = SDK_ROOT.parent / ".venv" / "bin"
+    venv_bin = SDK_ROOT / ".venv" / "bin"
     if venv_bin.exists():
         os.environ["PATH"] = f"{venv_bin}:{os.environ.get('PATH', '')}"
 
