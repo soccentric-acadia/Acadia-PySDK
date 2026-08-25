@@ -90,6 +90,87 @@ def call_stream(
             call.cancel()  # type: ignore[attr-defined]
 
 
+# Task 98: bound the stream so a slow consumer cannot grow an unbounded buffer,
+# and make cancellation/shutdown/close deterministic. `bounded_stream` reads the
+# underlying gRPC call into a fixed-capacity deque; if the consumer is slower
+# than the producer past the cap, it applies backpressure (blocks the reader)
+# rather than buffering without limit.
+def bounded_stream(
+    stub_method: Callable[..., Iterator[object]],
+    request: Any,
+    *,
+    timeout: float | None = None,
+    max_buffer: int = 256,
+) -> Iterator[object]:
+    """Task 98: bound a server stream so a slow consumer cannot grow an unbounded
+    buffer, and make cancellation/shutdown/close deterministic (idempotent).
+    Uses a Condition so no wakeup is lost; backpressure is applied once the
+    buffer is at capacity instead of buffering without limit.
+    """
+    from collections import deque
+    from threading import Condition, Thread
+
+    buf: deque[object] = deque(maxlen=max_buffer)
+    cond = Condition()
+    done = False
+    err: list[BaseException | None] = [None]
+    closed = [False]
+
+    def pump() -> None:
+        nonlocal done
+        try:
+            call = stub_method(request, timeout=timeout)
+        except grpc.RpcError as e:
+            err[0] = _translate_rpc_error(e)
+            with cond:
+                done = True
+                cond.notify_all()
+            return
+        try:
+            for item in call:
+                with cond:
+                    while len(buf) >= max_buffer and not closed[0]:
+                        cond.wait(timeout=0.1)
+                    if closed[0]:
+                        with suppress(Exception):
+                            call.cancel()  # type: ignore[attr-defined]
+                        return
+                    buf.append(item)
+                    cond.notify_all()
+        except grpc.RpcError as e:
+            err[0] = _translate_rpc_error(e)
+        finally:
+            with suppress(Exception):
+                call.cancel()  # type: ignore[attr-defined]
+            with cond:
+                done = True
+                cond.notify_all()
+
+    t = Thread(target=pump, daemon=True)
+    t.start()
+    try:
+        while True:
+            with cond:
+                while not buf and not done and err[0] is None and not closed[0]:
+                    cond.wait()
+                if buf:
+                    item = buf.popleft()
+                    cond.notify_all()  # wake pump waiting on backpressure
+                else:
+                    item = None
+            if item is not None:
+                yield item
+                continue
+            if err[0] is not None:
+                raise err[0]
+            return
+    finally:
+        with cond:
+            closed[0] = True
+            done = True
+            cond.notify_all()
+
+
 def handshake_modules(modules: list[Any]) -> None:
     """Verify every advertised module's version is within the SDK's support
     window. Raises :class:`ConnectionError` if any module is too new.
