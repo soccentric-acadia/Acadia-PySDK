@@ -69,3 +69,37 @@ jobs:
         tags: acadia-pysdk:ci
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+  wire-compat:
+    name: Real Server ↔ PySDK wire-compat (task 100)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: pysdk
+    - uses: actions/checkout@v4
+      with:
+        repository: soccentric-acadia/Acadia-HAL
+        path: Acadia-HAL
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v4
+      with:
+        repository: soccentric-acadia/Acadia-Server
+        path: server
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build + start real C++ Server
+      working-directory: server
+      run: |
+        cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+        ninja -C build -j$(nproc) acadia-server
+        # Start with default settings (Postgres optional; Server should still bind gRPC).
+        nohup ./build/acadia-server > /tmp/server.log 2>&1 &
+        sleep 5
+    - name: Install PySDK + run wire-compat
+      working-directory: pysdk
+      run: |
+        uv sync --extra dev
+        ACADIA_SERVER_ADDR=127.0.0.1:50051 .venv/bin/python tests/wire_compat.py
+    - name: Dump server log on failure
+      if: failure()
+      run: tail -c 8000 /tmp/server.log
