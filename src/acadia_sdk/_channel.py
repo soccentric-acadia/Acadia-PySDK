@@ -35,18 +35,24 @@ _STATUS_TO_EXC: dict[grpc.StatusCode, type[exc.IVVError]] = {
 }
 
 
-def open_channel(address: str, *, options: list[tuple[str, Any]] | None = None) -> grpc.Channel:
-    """Open a plaintext gRPC channel.
+def open_channel(
+    address: str,
+    *,
+    options: list[tuple[str, Any]] | None = None,
+    tls: bool = False,
+) -> grpc.Channel:
+    """Open a gRPC channel with optional TLS.
 
-    TLS is intentionally not configured in v1 — IV&V runs on a closed,
-    trusted lab subnet. The ``options`` seam is left so future versions can
-    add credentials, interceptors, keepalive tuning, etc., without touching
-    callers.
+    Task 99: when ``tls=True`` the channel uses TLS credentials so the peer's
+    listener (loopback / authenticated transport) can reject plaintext.
+    Plaintext remains the default for the closed lab subnet.
     """
     if not address:
         raise exc.ConnectionError("address must be a non-empty 'host:port' string")
     if ":" not in address:
         raise exc.ConnectionError(f"address must include a port: {address!r}")
+    if tls:
+        return grpc.secure_channel(address, grpc.ssl_channel_credentials(), options=options or [])
     return grpc.insecure_channel(address, options=options or [])
 
 
@@ -58,10 +64,14 @@ def _translate_rpc_error(rpc_err: grpc.RpcError) -> exc.IVVError:
     return cls(msg)
 
 
-def call_unary(stub_method: Callable[..., T], request: Any, *, timeout: float | None = None) -> T:
-    """Invoke a unary RPC, translating gRPC errors to SDK exceptions."""
+def call_unary(stub_method: Callable[..., T], request: Any, *, timeout: float | None = None,
+               metadata: tuple[tuple[str, str], ...] | None = None) -> T:
+    """Invoke a unary RPC, translating gRPC errors to SDK exceptions.
+
+    ``metadata`` (optional) carries auth/session metadata to the peer (task 99).
+    """
     try:
-        return stub_method(request, timeout=timeout)
+        return stub_method(request, timeout=timeout, metadata=metadata)
     except grpc.RpcError as rpc_err:
         raise _translate_rpc_error(rpc_err) from rpc_err
 

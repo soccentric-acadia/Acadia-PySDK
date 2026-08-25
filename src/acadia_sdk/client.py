@@ -21,13 +21,21 @@ if TYPE_CHECKING:
     from acadia_sdk.peripheral import Peripheral
 
 
-def connect(address: str, *, timeout: float | None = 5.0) -> Device:
+def connect(
+    address: str,
+    *,
+    timeout: float | None = 5.0,
+    tls: bool = False,
+    token: str | None = None,
+) -> Device:
     """Connect to an Acadia ``HalService`` endpoint.
 
     Args:
         address: Host:port string, e.g. ``"192.168.1.50:50051"``.
         timeout: Seconds to wait for the initial ``ListModules`` handshake.
             ``None`` means wait forever.
+        tls: Use a TLS channel to the peer (secure deployments).
+        token: Bearer token sent as ``authorization`` metadata on every call.
 
     Returns:
         A live :class:`Device`. Always close it (or use as a context manager).
@@ -41,8 +49,8 @@ def connect(address: str, *, timeout: float | None = 5.0) -> Device:
         ...     for module_id in dev.peripherals():
         ...         print(module_id)
     """
-    channel = _channel.open_channel(address)
-    dev = Device(channel=channel, address=address)
+    channel = _channel.open_channel(address, tls=tls)
+    dev = Device(channel=channel, address=address, token=token)
     try:
         dev._handshake(timeout=timeout)
     except Exception:
@@ -59,13 +67,20 @@ class Device:
     second :class:`Device` if you need parallel execution against a second peer.
     """
 
-    def __init__(self, channel: grpc.Channel, address: str) -> None:
+    def __init__(self, channel: grpc.Channel, address: str, token: str | None = None) -> None:
         self._channel = channel
         self._address = address
+        self._token = token
         self._stub = hal_service_pb2_grpc.HalServiceStub(channel)
         self._modules: dict[str, hal_types.ModuleInfo] = {}
         self._lock = threading.Lock()
         self._closed = False
+
+    def _metadata(self) -> tuple[tuple[str, str], ...] | None:
+        """Auth/session metadata carried on every call (task 99)."""
+        if self._token:
+            return (("authorization", f"Bearer {self._token}"),)
+        return None
 
     # ----- handshake / discovery -----
 
@@ -116,7 +131,8 @@ class Device:
 
     def _call(self, name: str, request: Any, *, timeout: float | None) -> Any:
         method = getattr(self._stub, name)
-        return _channel.call_unary(method, request, timeout=timeout)
+        return _channel.call_unary(method, request, timeout=timeout,
+                                   metadata=self._metadata())
 
     def _stream(self, name: str, request: Any, *, timeout: float | None) -> Iterator[Any]:
         method = getattr(self._stub, name)

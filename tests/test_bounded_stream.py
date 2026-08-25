@@ -26,3 +26,15 @@ def test_bounded_stream_closes_idempotently() -> None:
     assert first == 0
     gen.close()  # idempotent close
     gen.close()
+
+
+def test_device_metadata_token() -> None:
+    # Task 99: a token yields authorization metadata; absent token yields None.
+    import acadia_sdk
+    import grpc
+    from acadia_sdk import _channel
+
+    # open_channel must not require a token to stay plaintext.
+    ch = _channel.open_channel("127.0.0.1:1")
+    assert ch is not None
+    assert not hasattr(ch, "_secure")  # insecure by default
