@@ -91,7 +91,16 @@ def main() -> int:
     out_dir: Path = args.out.resolve()
 
     if not protos_dir.exists():
-        print(f"error: protos dir not found: {protos_dir}", file=sys.stderr)
+        print(
+            "error: Acadia-HAL protos directory not found: "
+            f"{protos_dir}\n"
+            "The SDK regenerates its bindings from Acadia-HAL's canonical proto tree.\n"
+            "Fix one of:\n"
+            "  1. Check out Acadia-HAL as a sibling:  make -C .. init   (creates ../Acadia-HAL)\n"
+            "  2. Point at an existing checkout:      ACADIA_HAL_PROTOS=/path/to/Acadia-HAL/protos make gen\n"
+            "  3. Pass it explicitly:                 python tools/gen_proto.py --protos /path/to/Acadia-HAL/protos",
+            file=sys.stderr,
+        )
         return 2
 
     # Discover proto files.

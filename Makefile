@@ -74,6 +74,7 @@ $(INSTALL_STAMP): $(VENV)/bin/python pyproject.toml
 .PHONY: gen gen-check gen-clean
 
 gen: $(INSTALL_STAMP) ## Regenerate proto + dataclass bindings from Acadia-HAL/protos
+##   Source tree override: ACADIA_HAL_PROTOS=/path/to/Acadia-HAL/protos make gen
 	$(call banner,Regenerating proto bindings)
 	@$(VENV)/bin/python tools/gen_proto.py
 	$(call banner,Regenerating dataclass bindings)
