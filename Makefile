@@ -147,6 +147,9 @@ install: setup ## Alias for setup
 # Targets are self-documenting: text after `## ` on a target line is picked up
 # by `make help` automatically, so the listing can never drift from the rules.
 .PHONY: help
+version: ## Print the project version (CONV-004)
+	@grep -m1 '^version' pyproject.toml | sed 's/.*"\(.*\)"/\1/'
+
 help: ## Show this help
 	@printf '\n  \033[1m%s\033[0m\n' 'Acadia-PySDK'
 	@printf '  Usage: make <target> [VAR=value ...]\n'
