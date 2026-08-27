@@ -23,6 +23,16 @@ jobs:
         key: uv-${{ hashFiles('pyproject.toml') }}
     - name: Install SDK (editable + dev)
       run: uv sync --extra dev
+    - name: No committed build artifacts (SDK-001)
+      run: |
+        hits=$(git ls-files | grep -E '(^|/)dist/|\.egg-info/|__pycache__/|\.pyc$' || true)
+        if [ -n "$hits" ]; then
+          echo "Committed build artifacts found:"; echo "$hits"
+          echo "Remove them and rely on .gitignore (dist/, *.egg-info/, __pycache__/)."
+          exit 1
+        else
+          echo "clean: no build artifacts tracked in git"
+        fi
     - name: Lint (ruff)
       run: make lint
     - name: Typecheck (mypy --strict)
