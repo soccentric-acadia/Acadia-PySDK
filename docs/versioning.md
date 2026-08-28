@@ -1,5 +1,9 @@
 # Versioning
 
+The fleet's canonical default gRPC port is `50051`; see the
+[Client/Server contract](../../../doc/client-server-contract.md) when choosing
+an endpoint for examples or integrations.
+
 Two version numbers ship with the SDK:
 
 * `acadia_sdk.__version__` — the SDK release version. SemVer.
