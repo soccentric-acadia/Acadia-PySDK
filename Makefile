@@ -109,11 +109,22 @@ test: $(INSTALL_STAMP) ## Run pytest with coverage
 
 lint: $(INSTALL_STAMP) ## Run ruff
 	$(call banner,Linting with ruff)
-	@$(VENV)/bin/python -m ruff check src/acadia_sdk
+	@$(VENV)/bin/python -m ruff check src/acadia_sdk gui
 
 typecheck: $(INSTALL_STAMP) ## Run mypy --strict
 	$(call banner,Type-checking with mypy --strict)
 	@$(VENV)/bin/python -m mypy --strict --config-file pyproject.toml src/acadia_sdk
+
+# ── GUI ───────────────────────────────────────────────────────────────────
+.PHONY: gui
+GUI_STAMP := $(STAMP_DIR)/gui-installed
+$(GUI_STAMP): pyproject.toml $(INSTALL_STAMP)
+	$(call banner,Installing PySide6 for the example-runner GUI)
+	@$(UV) pip install --python $(VENV)/bin/python "PySide6>=6.6,<7.0"
+	@mkdir -p $(STAMP_DIR) && touch $@
+
+gui: $(GUI_STAMP) ## Launch the PySide6 example-runner GUI
+	@$(VENV)/bin/python -m gui
 
 build: ## Build sdist + wheel in Docker (emerges in ./dist on the host)
 	$(call banner,Building distribution artefacts in Docker)

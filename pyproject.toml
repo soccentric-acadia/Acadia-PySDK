@@ -27,6 +27,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+gui = ["PySide6>=6.6,<7.0"]
 dev = [
   "grpcio-tools>=1.51,<2.0",
   "mypy-protobuf>=3.4",
