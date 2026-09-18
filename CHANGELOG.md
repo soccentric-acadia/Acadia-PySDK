@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-18 — Agent documentation and task workflow standardization
+
+- Replaced the detailed root `CLAUDE.md` with a canonical pointer and added
+  `AGENTS.md`.
+- Added a concise canonical document with Python validation and distribution
+  build instructions.
+- Added ignored local `Plan.md` and `Task.md` workflow artifacts.
+- Verified the required document shape and the declared `make check` and
+  `make build` targets.
+
 All notable changes to `acadia-sdk` are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
