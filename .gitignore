@@ -27,3 +27,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.log
+
+# Per-task working artifacts.
+Plan.md
+Task.md
