@@ -29,15 +29,31 @@ def _load(module_id: str) -> tuple[type, type[Message]]:
 
 
 def unpack_result(envelope: Any) -> Any:
-    """Decode a ``ResultEnvelope`` (typed dataclass) into the module-specific
-    ``Result`` dataclass. Returns the dataclass instance.
+    """Decode a ``ResultEnvelope`` (typed dataclass) into the typed payload
+    dataclass. Returns the dataclass instance.
 
-    Falls back to the raw envelope payload if the module is unknown.
+    SDK-001: the real Client (Acadia-Client ``HalServiceImpl::make_envelope``)
+    packs ``hal.common.TestResult`` into the envelope payload — that type is
+    decoded with the common typed binding. The module-specific
+    ``hal.modules.<id>.Result`` path is kept for envelopes produced against the
+    older per-module contract. Falls back to the raw envelope payload if the
+    module is unknown.
     """
     payload = envelope.payload  # AnyMessage dataclass
     if not payload.type_url:
         return None
     full_name = payload.type_url.split("/")[-1]
+
+    # SDK-001: real devices pack ``hal.common.TestResult``; decode it with the
+    # common typed binding instead of falling through to a raw AnyMessage.
+    if full_name == "hal.common.TestResult":
+        from acadia_sdk._proto import common_pb2
+        from acadia_sdk.types import common as common_types
+
+        pb_msg = common_pb2.TestResult()
+        pb_msg.ParseFromString(payload.value)
+        return common_types.TestResult.from_proto(pb_msg)
+
     # ``hal.modules.imu.Result`` → ``imu``
     parts = full_name.split(".")
     if len(parts) >= 3 and parts[0] == "hal" and parts[1] == "modules":

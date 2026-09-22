@@ -11,7 +11,7 @@ def test_monitor_yields_results(address: str) -> None:
         results = list(dev.peripheral("imu").monitor(period_ms=10, duration_s=0.1))
         assert len(results) >= 1
         first = results[0]
-        assert first.results[0].module_id == "imu"
+        assert first.module_id == "imu"
 
 
 def test_monitor_early_break(address: str) -> None:

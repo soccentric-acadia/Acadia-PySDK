@@ -2,6 +2,11 @@
 
 This deliberately uses the generated ``_proto`` stubs directly so the tests
 exercise the real wire format end-to-end.
+
+SDK-002: payloads packed here mirror what the real Client serialises — a
+``hal.common.TestResult`` (Acadia-Client ``HalServiceImpl::make_envelope``
+packs ``br::to_proto(r)``, i.e. ``hal.common.TestResult``), NOT the legacy
+per-module ``hal.modules.<id>.Result`` wrapper.
 """
 from __future__ import annotations
 
@@ -15,7 +20,6 @@ import grpc
 from google.protobuf import any_pb2
 
 from acadia_sdk._proto import common_pb2, hal_service_pb2, hal_service_pb2_grpc
-from acadia_sdk._proto.modules import cpu_pb2, imu_pb2
 
 
 def _pass_envelope(module_id: str, payload_msg: Any, *, mode: int) -> Any:
@@ -31,9 +35,10 @@ def _pass_envelope(module_id: str, payload_msg: Any, *, mode: int) -> Any:
     return env
 
 
-def _imu_result_pb(*, accel_x: float = 0.1) -> imu_pb2.Result:
-    r = imu_pb2.Result()
-    tr = r.results.add()
+def _imu_result_pb(*, accel_x: float = 0.1) -> common_pb2.TestResult:
+    # SDK-002: the real Client packs hal.common.TestResult (not
+    # hal.modules.imu.Result).
+    tr = common_pb2.TestResult()
     tr.module_id = "imu"
     tr.test_id = "accel_read"
     tr.name = "accel_read"
@@ -42,19 +47,18 @@ def _imu_result_pb(*, accel_x: float = 0.1) -> imu_pb2.Result:
     tr.output.metrics["accel_x"].double_value = accel_x
     tr.output.metrics["accel_y"].double_value = 0.0
     tr.output.metrics["accel_z"].double_value = 9.8
-    return r
+    return tr
 
 
-def _cpu_result_pb() -> cpu_pb2.Result:
-    r = cpu_pb2.Result()
-    tr = r.results.add()
+def _cpu_result_pb() -> common_pb2.TestResult:
+    tr = common_pb2.TestResult()
     tr.module_id = "cpu"
     tr.test_id = "load_avg"
     tr.name = "load_avg"
     tr.sequence = 1
     tr.output.status = common_pb2.TEST_STATUS_PASS
     tr.output.metrics["load_1m"].double_value = 0.42
-    return r
+    return tr
 
 
 class FakeHalService(hal_service_pb2_grpc.HalServiceServicer):

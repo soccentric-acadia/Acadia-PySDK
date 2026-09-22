@@ -9,18 +9,17 @@ import acadia_sdk
 def test_run_oneshot_returns_result(address: str) -> None:
     with acadia_sdk.connect(address) as dev:
         result = dev.peripheral("imu").run_oneshot()
-        assert result is not None
-        assert len(result.results) == 1
-        tr = result.results[0]
-        assert tr.module_id == "imu"
-        assert tr.output.metrics["accel_x"].double_value == pytest.approx(0.1)
-        assert tr.output.metrics["accel_z"].double_value == pytest.approx(9.8)
+        # SDK-001/002: the real Client packs hal.common.TestResult, so the
+        # unpacked payload IS a TestResult dataclass.
+        assert result.module_id == "imu"
+        assert result.output.metrics["accel_x"].double_value == pytest.approx(0.1)
+        assert result.output.metrics["accel_z"].double_value == pytest.approx(9.8)
 
 
 def test_self_test_alias(address: str) -> None:
     with acadia_sdk.connect(address) as dev:
         result = dev.peripheral("cpu").self_test()
-        assert result.results[0].module_id == "cpu"
+        assert result.module_id == "cpu"
 
 
 def test_oneshot_fail_returns_normally(fake_server, address: str) -> None:
